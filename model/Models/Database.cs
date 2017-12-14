@@ -749,6 +749,7 @@ order by fk.name, fkc.constraint_column_id
 					c.CHARACTER_MAXIMUM_LENGTH,
 					c.NUMERIC_PRECISION,
 					c.NUMERIC_SCALE,
+					c.COLLATION_NAME,
 					CASE WHEN COLUMNPROPERTY(OBJECT_ID(c.TABLE_SCHEMA + '.' + c.TABLE_NAME), c.COLUMN_NAME, 'IsRowGuidCol') = 1 THEN 'YES' ELSE 'NO' END AS IS_ROW_GUID_COL
 				from INFORMATION_SCHEMA.COLUMNS c
 					inner join INFORMATION_SCHEMA.TABLES t
@@ -775,6 +776,7 @@ order by fk.name, fkc.constraint_column_id
 					CASE WHEN t.name = 'nvarchar' and c.max_length > 0 THEN CAST(c.max_length as int)/2 ELSE CAST(c.max_length as int) END as CHARACTER_MAXIMUM_LENGTH,
 					c.precision as NUMERIC_PRECISION,
 					CAST(c.scale as int) as NUMERIC_SCALE,
+					COLLATION_NAME,
 					CASE WHEN c.is_rowguidcol = 1 THEN 'YES' ELSE 'NO' END as IS_ROW_GUID_COL
 				from sys.columns c
 					inner join sys.table_types tt
@@ -803,6 +805,7 @@ order by fk.name, fkc.constraint_column_id
 				var c = new Column {
 					Name = (string)dr["COLUMN_NAME"],
 					Type = (string)dr["DATA_TYPE"],
+					CollationName = (dr["COLLATION_NAME"] is DBNull ? null : (string)dr["COLLATION_NAME"]),
 					IsNullable = (string)dr["IS_NULLABLE"] == "YES",
 					Position = (int)dr["ORDINAL_POSITION"],
 					IsRowGuidCol = (string)dr["IS_ROW_GUID_COL"] == "YES"

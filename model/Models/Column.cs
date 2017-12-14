@@ -12,6 +12,7 @@ namespace SchemaZen.Library.Models {
 		public int Position { get; set; }
 		public byte Precision { get; set; }
 		public int Scale { get; set; }
+		public string CollationName { get; set; }
 		public string Type { get; set; }
 		public string ComputedDefinition { get; set; }
 		public bool IsRowGuidCol { get; set; }
@@ -43,6 +44,13 @@ namespace SchemaZen.Library.Models {
 			}
 		}
 
+		public string CollationText {
+			get {
+				if (CollationName == null || !string.IsNullOrEmpty(ComputedDefinition)) return "";
+				return "COLLATE " + CollationName;
+			}
+		}
+
 		public string DefaultText {
 			get {
 				if (Default == null || !string.IsNullOrEmpty(ComputedDefinition)) return "";
@@ -60,6 +68,7 @@ namespace SchemaZen.Library.Models {
 		public string RowGuidColText => IsRowGuidCol ? " ROWGUIDCOL " : string.Empty;
 
 		public bool Persisted { get; set; }
+		
 
 		public ColumnDiff Compare(Column c) {
 			return new ColumnDiff(this, c);
@@ -113,7 +122,7 @@ namespace SchemaZen.Library.Models {
 				case "varchar":
 					var lengthString = Length.ToString();
 					if (lengthString == "-1") lengthString = "max";
-					val.Append($"({lengthString}) {IsNullableText}");
+					val.Append($"({lengthString}) {CollationText} {IsNullableText}");
 					if (includeDefaultConstraint) val.Append(DefaultText);
 					return val.ToString();
 
@@ -175,7 +184,8 @@ namespace SchemaZen.Library.Models {
 
 		private bool IsDiffBase => Source.IsNullable != Target.IsNullable || Source.Length != Target.Length ||
 								   Source.Position != Target.Position || Source.Type != Target.Type || Source.Precision != Target.Precision ||
-								   Source.Scale != Target.Scale || Source.ComputedDefinition != Target.ComputedDefinition || Source.Persisted != Target.Persisted;
+								   Source.Scale != Target.Scale || Source.ComputedDefinition != Target.ComputedDefinition || Source.Persisted != Target.Persisted ||
+								   Source.CollationName != Target.CollationName;
 
 		public bool DefaultIsDiff => Source.DefaultText != Target.DefaultText;
 
